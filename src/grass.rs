@@ -58,6 +58,11 @@ fn spawn_grass_points(
             grassable.grass_mesh.clone(),
             grassable.grass_material.clone(),
             SpatialBundle {
+                // TODO: setting the grass entity position to f32::MIN is a hack. Currently, 
+                // this entity is rendered as a single grass blade due to its mesh, material,
+                // transform, and visibility components. I couldn't come up with a clean solution
+                // for this problem, as removing any of these components prevents the instanced
+                // grass from rendering as well.
                 transform: Transform::from_xyz(0., f32::MIN, 0.),
                 ..SpatialBundle::INHERITED_IDENTITY
             },

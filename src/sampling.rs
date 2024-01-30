@@ -99,6 +99,6 @@ impl MeshSampler for UniformRandomSampler {
     }
 
     fn sample_tri_strip(&self, _mesh: &Mesh) -> Vec<Vec3> {
-        vec![]
+        todo!() // work in progress
     }
 }
