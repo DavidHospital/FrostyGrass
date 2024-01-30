@@ -4,8 +4,6 @@ use bevy::{prelude::*, DefaultPlugins};
 use bevy_xpbd_3d::prelude::PhysicsPlugins;
 use terrain::TerrainPlugin;
 
-mod grass_material;
-mod instancing;
 mod render;
 mod sampling;
 mod terrain;
@@ -31,7 +29,7 @@ fn setup_scene(mut commands: Commands) {
         },
         transform: Transform {
             translation: Vec3::new(0.0, 2.0, 0.0),
-            rotation: Quat::from_rotation_x(-PI / 6.),
+            rotation: Quat::from_rotation_x(-PI / 4.),
             ..default()
         },
         ..default()

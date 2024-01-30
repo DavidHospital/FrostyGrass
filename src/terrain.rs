@@ -16,24 +16,11 @@ pub struct Terrain;
 #[derive(Component)]
 struct GrassPoints(Vec<Vec3>);
 
-// #[derive(Component)]
-// struct GrassConfiguration {
-//     density: f32,
-//     grass_mesh: Handle<Mesh>,
-//     grass_material: Handle<StandardMaterial>,
-//     color_map_texture: Handle<Image>,
-// }
-
 pub struct TerrainPlugin;
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            // MaterialPlugin::<StandardMaterial>::default(),
-            // CustomMaterialPlugin,
-            GrassPlugin,
-        ))
+        app.add_plugins(GrassPlugin)
         .add_systems(Startup, setup_terrain);
-        // .add_systems(PostStartup, spawn_grass_points);
     }
 }
 
@@ -46,73 +33,35 @@ fn setup_terrain(
     let terrain_mesh = _create_mesh(128, 128, 1., 1);
     let terrain_mesh_handle = meshes.add(terrain_mesh.clone().into());
 
-    let grass_mesh = asset_server.load::<Mesh>("models/grass.gltf#Mesh0/Primitive0");
-    let grass_material = materials.add(StandardMaterial {
+    let grass_mesh_handle = asset_server.load::<Mesh>("models/grass.gltf#Mesh0/Primitive0");
+    let grass_material = StandardMaterial {
         base_color: Color::hsla(105., 0.53, 0.33, 1.0),
         reflectance: 0.05,
         diffuse_transmission: 0.5,
         ..default()
-    });
-
-    // let color_map_texture = asset_server.load("textures/color_map.png");
+    };
+    let grass_material_handle = materials.add(grass_material.clone());
+    let mut terrain_material = grass_material.clone();
+    terrain_material.base_color.set_l(terrain_material.base_color.l() * 0.5);
+    terrain_material.reflectance = 0.;
 
     commands.spawn((
         Terrain,
         MaterialMeshBundle {
             mesh: terrain_mesh_handle.clone(),
-            material: materials.add(StandardMaterial {
-                base_color: Color::hsla(105., 0.53, 0.33, 1.0),
-                reflectance: 0.05,
-                diffuse_transmission: 0.5,
-                ..default()
-            }),
+            material: materials.add(terrain_material),
             ..default()
         },
         RigidBody::Static,
         Collider::trimesh_from_mesh(&terrain_mesh.into()).unwrap(),
         Grassable {
             mesh: terrain_mesh_handle,
-            density: 16.,
-            grass_mesh,
-            grass_material,
+            density: 32.,
+            grass_mesh: grass_mesh_handle,
+            grass_material: grass_material_handle,
         },
     ));
 }
-
-// fn spawn_grass_points(
-//     mut commands: Commands,
-//     meshes: Res<Assets<Mesh>>,
-//     terrain_q: Query<(&Transform, &GrassConfiguration, &Handle<Mesh>), With<Terrain>>,
-// ) {
-//     for (transform, grass_config, mesh_handle) in terrain_q.iter() {
-//         let mesh = meshes.get(mesh_handle).unwrap();
-//         let grass_points = UniformRandomSampler {
-//             density: grass_config.density,
-//             threshold: 0.75,
-//         }
-//         .sample(mesh);
-//         println!("Grass points: {:?}", grass_points.len());
-//         if grass_points.len() > 0 {
-//             println!("{}", grass_points.len());
-//             commands.spawn((
-//                 grass_config.grass_mesh.clone(),
-//                 grass_config.grass_material.clone(),
-//                 ColorMap::from(grass_config.color_map_texture.clone()),
-//                 SpatialBundle::INHERITED_IDENTITY,
-//                 InstanceMaterialData(
-//                     grass_points
-//                         .iter()
-//                         .map(|vec| InstanceData {
-//                             position: transform.transform_point(*vec),
-//                             scale: 1.0,
-//                         })
-//                         .collect(),
-//                 ),
-//                 NoFrustumCulling,
-//             ));
-//         }
-//     }
-// }
 
 fn _terrain_height(fbm: &Fbm<Perlin>, x: f32, y: f32) -> f32 {
     return fbm.get([x as f64 * 0.05678, y as f64 * 0.05678]) as f32;
@@ -142,7 +91,6 @@ fn _create_mesh(width: usize, height: usize, scale: f32, tex_scale: usize) -> Me
         for j in 0..(height+1) {
             let z_pos = j as f32 * scale;
             vertices.push(Vec3::new(x_pos, noise_map.get_value(i, j) as f32 * scale * 8., z_pos));
-            // vertices.push(Vec3::new(x_pos, _terrain_height(&fbm, x_pos, z_pos), z_pos));
         }
     }
 

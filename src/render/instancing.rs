@@ -39,8 +39,11 @@ where
     }
 }
 
-#[derive(Component, Deref)]
-pub struct InstanceData<D>(pub Vec<D>);
+#[derive(Component, Clone)]
+pub struct InstanceData<D> {
+    pub data: Vec<D>,
+    pub mesh: Handle<Mesh>,
+}
 
 impl<D: InstancedMaterial> ExtractComponent for InstanceData<D> {
     type Query = &'static InstanceData<D>;
@@ -48,7 +51,7 @@ impl<D: InstancedMaterial> ExtractComponent for InstanceData<D> {
     type Out = Self;
 
     fn extract_component(item: QueryItem<'_, Self::Query>) -> Option<Self::Out> {
-        Some(InstanceData::<D>(item.0.clone()))
+        Some(item.clone())
     }
 }
 
@@ -197,8 +200,8 @@ fn queue_custom<D: 'static>(
     mut pipelines: ResMut<SpecializedMeshPipelines<InstancingPipeline<D>>>,
     pipeline_cache: Res<PipelineCache>,
     meshes: Res<RenderAssets<Mesh>>,
-    render_mesh_instances: Res<RenderMeshInstances>,
-    material_meshes: Query<Entity, With<InstanceData<D>>>,
+    // render_mesh_instances: Res<RenderMeshInstances>,
+    material_meshes: Query<(Entity, &InstanceData<D>)>,
     mut views: Query<(&ExtractedView, &mut RenderPhase<Transparent3d>)>,
 ) where
     D: InstancedMaterial,
@@ -211,12 +214,12 @@ fn queue_custom<D: 'static>(
 
     for (view, mut transparent_phase) in &mut views {
         let view_key = msaa_key | MeshPipelineKey::from_hdr(view.hdr);
-        let rangefinder = view.rangefinder3d();
-        for entity in &material_meshes {
-            let Some(mesh_instance) = render_mesh_instances.get(&entity) else {
-                continue;
-            };
-            let Some(mesh) = meshes.get(mesh_instance.mesh_asset_id) else {
+        // let rangefinder = view.rangefinder3d();
+        for (entity, instance_data) in &material_meshes {
+            // let Some(mesh_instance) = render_mesh_instances.get(&entity) else {
+            //     continue;
+            // };
+            let Some(mesh) = meshes.get(instance_data.mesh.id()) else {
                 continue;
             };
             let key = view_key | MeshPipelineKey::from_primitive_topology(mesh.primitive_topology);
@@ -227,8 +230,9 @@ fn queue_custom<D: 'static>(
                 entity,
                 pipeline,
                 draw_function: draw_custom,
-                distance: rangefinder
-                    .distance_translation(&mesh_instance.transforms.transform.translation),
+                // distance: rangefinder
+                //     .distance_translation(&mesh_instance.transforms.transform.translation),
+                distance: 0.,
                 batch_range: 0..1,
                 dynamic_offset: None,
             });
@@ -252,12 +256,12 @@ fn prepare_instance_buffers<D: 'static>(
     for (entity, instance_data) in &query {
         let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
             label: Some("instance data buffer"),
-            contents: bytemuck::cast_slice(instance_data.as_slice()),
+            contents: bytemuck::cast_slice(instance_data.data.as_slice()),
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
         });
         commands.entity(entity).insert(InstanceBuffer {
             buffer,
-            length: instance_data.len(),
+            length: instance_data.data.len(),
         });
     }
 }

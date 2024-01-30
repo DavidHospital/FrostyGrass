@@ -16,7 +16,7 @@ impl InstancedMaterial for Grass {
     type M = StandardMaterial;
 
     fn shader_path() -> &'static str {
-        "shaders/instancing.wgsl"
+        "shaders/grass.wgsl"
     }
 }
 
@@ -57,16 +57,20 @@ fn spawn_grass_points(
         commands.spawn((
             grassable.grass_mesh.clone(),
             grassable.grass_material.clone(),
-            SpatialBundle::INHERITED_IDENTITY,
-            InstanceData(
-                grass_points
+            SpatialBundle {
+                transform: Transform::from_xyz(0., f32::MIN, 0.),
+                ..SpatialBundle::INHERITED_IDENTITY
+            },
+            InstanceData {
+                data: grass_points
                     .iter()
                     .map(|vec| Grass {
                         position: transform.transform_point(*vec),
                         scale: 1.,
                     })
                     .collect(),
-            ),
+                mesh: grassable.grass_mesh.clone(),
+            },
             NoFrustumCulling,
         ));
     }
