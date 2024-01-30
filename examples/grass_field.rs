@@ -1,19 +1,19 @@
 use std::f32::consts::PI;
 
 use bevy::{prelude::*, DefaultPlugins};
-use bevy_xpbd_3d::prelude::PhysicsPlugins;
-use terrain::TerrainPlugin;
 
-mod render;
-mod sampling;
+use crate::terrain::TerrainPlugin;
+
 mod terrain;
 
 fn main() {
+    println!("here");
     App::new()
-        .add_plugins((DefaultPlugins, TerrainPlugin, PhysicsPlugins::default()))
+        .add_plugins((DefaultPlugins, TerrainPlugin))
         .add_systems(Startup, setup_scene)
         .add_systems(Update, move_camera)
         .run();
+    println!("here2");
 }
 
 fn setup_scene(mut commands: Commands) {

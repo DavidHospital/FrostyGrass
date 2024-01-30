@@ -2,13 +2,12 @@ use bevy::{
     prelude::*,
     render::{mesh::Indices, render_resource::PrimitiveTopology},
 };
-use bevy_xpbd_3d::prelude::*;
 use noise::{
     utils::{NoiseMapBuilder, PlaneMapBuilder},
     Fbm, NoiseFn, Perlin,
 };
 
-use crate::render::grass::{GrassPlugin, Grassable};
+use frosty_grass::grass::{GrassPlugin, Grassable};
 
 #[derive(Component)]
 pub struct Terrain;
@@ -20,7 +19,7 @@ pub struct TerrainPlugin;
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(GrassPlugin)
-        .add_systems(Startup, setup_terrain);
+            .add_systems(Startup, setup_terrain);
     }
 }
 
@@ -42,7 +41,9 @@ fn setup_terrain(
     };
     let grass_material_handle = materials.add(grass_material.clone());
     let mut terrain_material = grass_material.clone();
-    terrain_material.base_color.set_l(terrain_material.base_color.l() * 0.5);
+    terrain_material
+        .base_color
+        .set_l(terrain_material.base_color.l() * 0.5);
     terrain_material.reflectance = 0.;
 
     commands.spawn((
@@ -52,8 +53,6 @@ fn setup_terrain(
             material: materials.add(terrain_material),
             ..default()
         },
-        RigidBody::Static,
-        Collider::trimesh_from_mesh(&terrain_mesh.into()).unwrap(),
         Grassable {
             mesh: terrain_mesh_handle,
             density: 32.,
@@ -177,3 +176,7 @@ fn _average_normal(vertices: &Vec<Vec3>, width: usize, height: usize, x: usize, 
     }
     Vec3::ZERO
 }
+
+// needed for rust-analyzer to be happy
+#[allow(dead_code)]
+fn main() {}

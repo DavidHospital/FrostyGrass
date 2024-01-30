@@ -3,7 +3,7 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::sampling::{MeshSampler, UniformRandomSampler};
 
-use super::instancing::{InstanceData, InstancedMaterial, InstancingPlugin};
+use crate::render::instancing::{InstanceData, InstancedMaterial, InstancingPlugin};
 
 #[derive(Component, Copy, Clone, Pod, Zeroable)]
 #[repr(C)]

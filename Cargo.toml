@@ -1,17 +1,25 @@
 [package]
-name = "grass"
-version = "0.1.0"
+name = "frosty_grass"
+version = "0.0.1"
 edition = "2021"
-
-[profile.dev.package."*"]
-opt-level = 0
+exclude = ["./assets/"]
+keywords = ["bevy", "gamedev", "grass", "rendering", "instancing"]
+repository = "https://github.com/DavidHospital/FrostyGrass"
+description = "A bevy 3D plugin for rendering grass using GPU instancing"
 
 [dependencies]
-bevy = { version = "0.12.1", features = ["jpeg"] }
-bevy_xpbd_3d = "0.3.3"
+bevy = { version = "0.12.1", default-features = false, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_gltf"] }
 bytemuck = "1.14.0"
+wgpu = "0.18.0"
 fastrand = "2.0.1"
-noise = "0.8.2"
 rand = "0.8.5"
 rand_distr = "0.4.3"
-wgpu = "0.18.0"
+
+[dev-dependencies]
+bevy = { version = "0.12.1", default-features = false, features = ["bevy_winit", "x11", "ktx2", "zstd", "tonemapping_luts"] }
+noise = "0.8.2"
+
+[[example]]
+name = "grass_field"
+path = "examples/grass_field.rs"
+
