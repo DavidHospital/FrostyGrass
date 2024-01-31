@@ -1,11 +1,13 @@
 [package]
 name = "frosty_grass"
+description = "A bevy plugin for rendering grass on 3D meshes using GPU instancing"
 version = "0.0.1"
-edition = "2021"
-exclude = ["./assets/"]
+exclude = ["./assets", "./images"]
 keywords = ["bevy", "gamedev", "grass", "rendering", "instancing"]
 repository = "https://github.com/DavidHospital/FrostyGrass"
-description = "A bevy 3D plugin for rendering grass using GPU instancing"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+edition = "2021"
 
 [dependencies]
 bevy = { version = "0.12.1", default-features = false, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_gltf"] }
